@@ -5,7 +5,7 @@
     <!-- Tool developer -->
     <creator>
         <person givenName="Fabio" familyName="Cumbo" 
-                url="https://fabio-cumbo.github.io/" 
+                url="https://cumbof.github.io/" 
                 email="fabio.cumbo@gmail.com" />
     </creator>
 
@@ -154,7 +154,7 @@ that come out from the hyperdimensional model that reached the best accuracy.
 
 Please visit the official GitHub repository_ for other information about `chopin2`.
 
-.. _repository: https://github.com/fabio-cumbo/chopin2
+.. _repository: https://github.com/cumbof/chopin2
     ]]></help>
 
     <citations>
