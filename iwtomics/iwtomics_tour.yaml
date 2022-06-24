@@ -25,10 +25,10 @@ steps:
       intro: "ETn example: real data from Campos-Sànchez et al. (2016). Upload 'Fixed ETn' and 'Control' regions, as well as 'Recombination Hotspot' content."
       position: "top"
       textinsert: |
-        https://raw.githubusercontent.com/fabio-cumbo/IWTomics4Galaxy/master/ETn_example/DESCRIPTION.txt
-        https://raw.githubusercontent.com/fabio-cumbo/IWTomics4Galaxy/master/ETn_example/ETn_fixed.bed
-        https://raw.githubusercontent.com/fabio-cumbo/IWTomics4Galaxy/master/ETn_example/Control.bed
-        https://raw.githubusercontent.com/fabio-cumbo/IWTomics4Galaxy/master/ETn_example/Recombination_hotspots.txt
+        https://raw.githubusercontent.com/cumbof/galaxytools/main/iwtomics/ETn_example/DESCRIPTION.txt
+        https://raw.githubusercontent.com/cumbof/galaxytools/main/iwtomics/ETn_example/ETn_fixed.bed
+        https://raw.githubusercontent.com/cumbof/galaxytools/main/iwtomics/ETn_example/Control.bed
+        https://raw.githubusercontent.com/cumbof/galaxytools/main/iwtomics/ETn_example/Recombination_hotspots.txt
 
     - title: "Select automatic file type"
       element: ".upload-extension:first"
@@ -57,8 +57,8 @@ steps:
       intro: "ETn example: real data from Campos-Sànchez et al. (2016). Upload header files for regions and features."
       position: "top"
       textinsert: |
-        https://raw.githubusercontent.com/fabio-cumbo/IWTomics4Galaxy/master/ETn_example/regions_header.tabular
-        https://raw.githubusercontent.com/fabio-cumbo/IWTomics4Galaxy/master/ETn_example/features_header.tabular
+        https://raw.githubusercontent.com/cumbof/galaxytools/main/iwtomics/ETn_example/regions_header.tabular
+        https://raw.githubusercontent.com/cumbof/galaxytools/main/iwtomics/ETn_example/features_header.tabular
     
     - title: "Select header file type"
       element: ".upload-extension:first"
