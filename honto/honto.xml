@@ -17,7 +17,7 @@
                 email="daniele.santoni@iasi.cnr.it" />
 
         <person givenName="Fabio" familyName="Cumbo" 
-                url="https://fabio-cumbo.github.io/" 
+                url="https://cumbof.github.io/" 
                 email="fabio.cumbo@gmail.com" />
     </creator>
 
@@ -229,7 +229,7 @@ The third output is a PDF with the final heatmap.
 
 Please visit the official GitHub repository_ for other information about `honto`.
 
-.. _repository: https://github.com/fabio-cumbo/honto
+.. _repository: https://github.com/cumbof/honto
     ]]></help>
 
 </tool>
