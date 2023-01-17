@@ -62,11 +62,16 @@
                      of folds could significantly increase the running time." />
 
         <conditional name="feature_selection">
-            <param name="enable_fs" type="boolean" checked="false" truevalue="true" falsevalue="false" 
+            <param name="enable_fs" type="select" 
                    label="Enable feature selection" 
                    help="If selected, this will extract a set of features with the better discriminative power among classes. 
-                         The feature selection algorithm is defined as a backward variable selection method." />
+                         The feature selection algorithm is defined as a backward variable selection method.">
+                <option value="false" selected="true">Disabled</option>
+                <option value="true">Enabled</option>
+            </param>
             
+            <when value="false" />
+
             <when value="true">
                 <param name="group_min" type="integer" value="1" min="1" 
                        label="Minimum number of selected features" 
@@ -100,7 +105,7 @@
             
             <output name="summary" ftype="txt" value="summary.txt">
                 <assert_contents>
-                    <has_n_columns n="5" \>
+                    <has_n_columns n="5" />
                     <has_text_matching expression="# Run ID\tGroup Size\tRetraining\tAccuracy\tExcluded Feature"/>
                     <has_text text="8f0e142ff27db7f8d2cc66cfcc05e27c" />
                 </assert_contents>
