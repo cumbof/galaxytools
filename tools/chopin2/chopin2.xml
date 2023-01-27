@@ -10,15 +10,15 @@
 
     <command detect_errors="exit_code">
 <![CDATA[
-    ln -s '${dataset}' &&
+    ln -s '$dataset' '${dataset.element_identifier}' &&
 
     chopin2
 
-    --dataset `basename $dataset`
-    #if str($datatype) == 'csv':
+    --dataset '${dataset.element_identifier}'
+    #if $dataset.ext == 'csv':
         --fieldsep ','
     #else:
-        --fieldsep $'\t'
+        --fieldsep \$'\t'
     #end if
 
     --dimensionality ${dimensionality}
@@ -45,11 +45,6 @@
         <param name="dataset" type="data" format="csv,tabular" 
                label="Select a dataset" 
                help="Input dataset with features on columns and observations on rows. The first column must contain the observation IDs, while the last column must contain classes. The header line is also required." />
-        
-        <param name="datatype" type="select" label="Input dataset type">
-            <option value="csv" selected="true">Comma-separated values</option>
-            <option value="tsv">Tabular</option>
-        </param>
         
         <param name="dimensionality" type="integer" value="10000" min="100" 
                label="Vectors dimensionality" 
@@ -100,7 +95,13 @@
     </inputs>
 
     <outputs>
-        <data format="tabular" name="summary" label="${tool.name} on ${on_string}: Summary" from_work_dir="summary.txt" />
+        <data format="tabular" name="summary" label="${tool.name} on ${on_string}: Summary" from_work_dir="summary.txt">
+            <actions>
+                <action name="column_names" type="metadata" default="Run ID,Group Size,Retraining,Accuracy,Excluded Feature" />
+                <action name="column_types" type="metadata" default="str,int,int,float,str" />
+                <action name="comment_lines" type="metadata" default="7" />
+            </actions>
+        </data>
         <data format="txt" name="selection" label="${tool.name} on ${on_string}: Selection" from_work_dir="selection.txt">
             <filter>feature_selection["enable_fs"]</filter>
         </data>
