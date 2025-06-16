@@ -17,9 +17,9 @@ mkdir -p ${input_dir} &&
 
 #for $genome in $genomes:
     #if $genome.ext.endswith("gz"):
-        gunzip $genome > ${input_dir}/${genome.name}.fna &&
+        gunzip "$genome" > "${input_dir}/${genome.name}.fna" &&
     #else
-        ln -s $genome ${input_dir}/${genome.name}.fna &&
+        ln -s "$genome" "${input_dir}/${genome.name}.fna" &&
     #end if
 #end for
 
@@ -66,9 +66,13 @@ mkdir -p ${input_dir} &&
 #else:
     find ${input_dir} -type f -name "*.fna" -exec realpath {} >> ${input_dir}/genomes.txt \; &&
 
-    #set tarball_filepath="${workdir}/${$advanced.index_update_conditional.database_selection.db_tarball}"
+    #if $advanced.index_update_conditional.database_selection.source == "cvmfs":
+        #set tarball_filepath="${workdir}/${advanced.index_update_conditional.database_selection.db_tarball}"
+    #else:
+        #set tarball_filepath="${workdir}/${advanced.index_update_conditional.database_selection.db_tarball.name}"
+    #end if
 
-    ln -s ${$advanced.index_update_conditional.database_selection.db_tarball} ${tarball_filepath}
+    ln -s "${advanced.index_update_conditional.database_selection.db_tarball}" "${tarball_filepath}" &&
 
     metasbt unpack --workdir $workdir \
                    --tarball ${tarball_filepath} &&
