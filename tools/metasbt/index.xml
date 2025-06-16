@@ -271,7 +271,7 @@ mv "$(find ${workdir} -maxdepth 1 -name '*.tar.gz' -print -quit)" MetaSBT-Databa
 
     <tests>
         <test>
-
+            <!-- Add test cases here -->
         </test>
     </tests>
 
@@ -286,10 +286,8 @@ This tool act as an interface to the `index` and `update` subroutines of MetaSBT
 
 .. class:: infomark
 
-Notes
-
 Please visit the official GitHub repository_ for additional information about MetaSBT.
-Additional information about public MetaSBT Databases is also available in the official MetaSBT-DBs_ repository on GitHub.
+Public MetaSBT Databases are available at the official MetaSBT-DBs_ repository.
 
 .. _repository: https://github.com/cumbof/MetaSBT
 .. _MetaSBT-DBs: https://github.com/cumbof/MetaSBT-DBs
