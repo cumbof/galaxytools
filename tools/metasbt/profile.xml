@@ -1,89 +1,126 @@
 <?xml version="1.0"?>
 <tool name="profile" id="metasbt_profile" version="@TOOL_VERSION@+galaxy@GALAXY_VERSION@" profile="@PROFILE@" license="MIT">
-    <description>genomes from isolate sequencing and metagenome-assembled genomes with Sequence Bloom Trees</description>
+    <description>genomes with MetaSBT to infer their taxonomic</description>
 
     <macros>
         <import>macros.xml</import>
     </macros>
-
     <expand macro="creator"/>
-
     <expand macro="requirements"/>
 
-    <command detect_errors="exit_code">
-<![CDATA[
+    <command detect_errors="exit_code"><![CDATA[
+#set workdir="./workdir"
+#set input_dir="${workdir}/genomes"
 
-]]>
-    </command>
+mkdir -p ${input_dir} &&
+
+#for $genome in $genomes:
+    #if $genome.ext.endswith("gz"):
+        gunzip "$genome" > "${input_dir}/${genome.name}.fna" &&
+    #else
+        ln -s "$genome" "${input_dir}/${genome.name}.fna" &&
+    #end if
+#end for
+
+find ${input_dir} -type f -name "*.fna" -exec realpath {} \; > ${input_dir}/genomes.txt &&
+
+#set tarball_filepath = "${workdir}/${database.db_tarball.name}"
+
+ln -s "$database.db_tarball" "$tarball_filepath" &&
+
+metasbt unpack --workdir $workdir \
+               --tarball "$tarball_filepath" &&
+
+metasbt profile --workdir $workdir \
+                --database $(basename "$tarball_filepath" | cut -d'-' -f2) \
+                --genomes ${input_dir}/genomes.txt \
+                --uncertainty $advanced.uncertainty \
+                --pruning-threshold $advanced.pruning_threshold \
+                --nproc \${GALAXY_SLOTS:-4} &&
+
+rm "$tarball_filepath" &&
+
+mkdir output &&
+
+find ${workdir}/tmp/profiles -type f -name "*.txt" \
+    -exec sh -c 'cp "$1" "output/$(basename "$1")"' _ {} \;
+    ]]></command>
 
     <inputs>
-        <!-- Input genomes or sequences -->
-        <param name="input" format="fa,fasta,fna,fa.gz,fasta.gz,fna.gz" multiple="true" type="data"
-               label="Input genomes or sequences"
-               help="Select a set of input genomes or sequences. Please note that input files must all have the same format." />
+        <param name="genomes" format="fa,fasta,fna,fa.gz,fasta.gz,fna.gz" multiple="true" type="data"
+               label="Input genomes"
+               help="Select the genomes to be profiled with MetaSBT." />
 
-        <!-- Input type -->
-        <param name="inputtype" type="select"
-               label="Input type"
-               help="Input files can be genomes (one genome per file) or sequences (one or more files with multiple records processed as independent sequences)." />
+        <conditional name="database">
+            <param name="source" type="select"
+                   label="Database source"
+                   help="Select whether to use a public MetaSBT database or one from your history.">
+                <option value="cvmfs">Use a public database</option>
+                <option value="history">Use a database from the history</option>
+            </param>
 
-        <!-- Query threshold -->
-        <param name="threshold" type="float" size="1" value="0.7" min="0.0" max="1.0"
-               label="Search threshold"
-               help="Fraction of kmers of the input genomes or sequences that must be present in a leaf of the Sequence Bloom Trees in the database to be considered a match." />
-
-        <!-- Expand the query-->
-        <conditional name="expand_selection">
-            <!-- Enable query expansion to lower taxonomic levels -->
-            <param name="expand" type="boolean" checked="true" truevalue="true" falsevalue="false"
-                   label="Expand the query"
-                   help="Keep querying lower taxonomic levels in case of a taxonomically organized database." />
-            
-            <when value="true">
-                <!-- Stop at a specific taxonomic level -->
-                <param name="stopat" type="select"
-                       label="Stop at"
-                       help="Stop expanding the query when reaching a specific taxonomic level.">
-                    <option value="phylum">Phylum</option>
-                    <option value="class">Class</option>
-                    <option value="order">Order</option>
-                    <option value="Family">Family</option>
-                    <option value="genus">Genus</option>
-                    <option value="species" selected="true">Species</option>
+            <when value="cvmfs">
+                <param name="db_tarball" type="select"
+                       label="Select a public MetaSBT database"
+                       help="Choose a specific version of a public database.">
+                    <options from_data_table="metasbt_databases">
+                        <column name="value" index="2" />
+                        <column name="name" format="${0} (v${1})" />
+                        <filter type="sort_by" column="1" />
+                    </options>
+                    <validator type="no_options" message="There are no MetaSBT databases available." />
                 </param>
             </when>
+
+            <when value="history">
+                <param name="db_tarball" type="data" format="tar.gz"
+                       label="Select a MetaSBT database tarball" />
+            </when>
         </conditional>
+
+        <section name="advanced" expanded="false" title="Advanced options">
+            <param name="uncertainty" type="float" value="20.0" min="0.0" max="100.0"
+                   label="Uncertainty percentage"
+                   help="Include all best hits within this percentage from the top hit." />
+
+            <param name="pruning_threshold" type="float" value="0.0" min="0.0" max="1.0"
+                   label="Pruning threshold"
+                   help="Filter out paths in the Sequence Bloom Tree below this pruning threshold." />
+        </section>
     </inputs>
 
     <outputs>
-        <!-- Table with input profiles -->
-        <!-- The profile module of MetaSBT produces an output file for each of the input files -->
-        <!-- Here, the output files of the profile tool are collapsed into a single table -->
-        <data format="tsv" name="profile" label="${tool.name} on ${on_string}: profiles" from_work_dir="profiles.tsv">
-            <action>
-                <action name="column_names" type="metadata" default="Input,Level,Taxonomy,Common Kmers,Score" />
-                <action name="column_types" type="metadata" default="str,str,str,str,float" />
-                <action name="comment_lines" type="metadata" default="2" />
-            </action>
-        </data>
+        <collection name="profiles" type="list" label="${tool.name} on ${on_string}: taxonomic profiles">
+            <discover_datasets pattern="(?P&lt;name&gt;.+)\.txt" directory="output" ext="tabular" visible="true" />
+        </collection>
     </outputs>
+
+    <tests>
+        <test>
+            <!-- Add test cases here -->
+        </test>
+    </tests>
 
     <help>
 <![CDATA[
-This tool aims at accurately characterizing genomes from isolate sequencing and metagenome-assembled genomes by querying a
-curated database of microbial species indexed with MetaSBT.
+**What it does**
 
-Given a set of input genomes or sequences, it returns a table with the closest lineage at different taxonomic levels,
-in addition to the closest genome in the database and its accuracy score.
+This tool wraps the `profile` subcommand of MetaSBT to infer the closest taxonomic assignments for a set of genomes using a MetaSBT database.
+
+**Input**  
+A list of genomes in FASTA or compressed format.
+
+**Output**  
+A collection of 3-column tables (level, closest, ANI) per input genome.
+
+Each table reports the most likely taxonomic assignments at different levels (e.g., kingdom, phylum), with their estimated Average Nucleotide Identity (ANI).
 
 -----
 
 .. class:: infomark
 
-__Notes__
-
-Please visit the official GitHub repository_ for additional information about `MetaSBT`.
-Additional information about public MetaSBT Databases is also available in the official MetaSBT-DBs_ repository on GitHub.
+Please visit the official GitHub repository_ for additional information about MetaSBT.
+Public MetaSBT Databases are available at the official MetaSBT-DBs_ repository.
 
 .. _repository: https://github.com/cumbof/MetaSBT
 .. _MetaSBT-DBs: https://github.com/cumbof/MetaSBT-DBs
