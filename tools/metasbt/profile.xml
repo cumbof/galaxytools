@@ -12,38 +12,40 @@
 #set workdir="./workdir"
 #set input_dir="${workdir}/genomes"
 
-mkdir -p ${input_dir} &&
+mkdir -p "${input_dir}" &&
 
 #for $genome in $genomes:
     #if $genome.ext.endswith("gz"):
-        gunzip "$genome" > "${input_dir}/${genome.name}.fna" &&
+        gzip -dc "$genome" > "${input_dir}/${genome.name}.fna" &&
     #else
         ln -s "$genome" "${input_dir}/${genome.name}.fna" &&
     #end if
 #end for
 
-find ${input_dir} -type f -name "*.fna" -exec realpath {} \; > ${input_dir}/genomes.txt &&
+find "${input_dir}" -type f -name "*.fna" -exec realpath {} \; > "${input_dir}/genomes.txt" &&
 
 #set tarball_filepath = "${workdir}/${database.db_tarball.name}"
 
 ln -s "$database.db_tarball" "$tarball_filepath" &&
 
-metasbt unpack --workdir $workdir \
+metasbt unpack --workdir "$workdir" \
                --tarball "$tarball_filepath" &&
 
-metasbt profile --workdir $workdir \
-                --database $(basename "$tarball_filepath" | cut -d'-' -f2) \
-                --genomes ${input_dir}/genomes.txt \
-                --uncertainty $advanced.uncertainty \
-                --pruning-threshold $advanced.pruning_threshold \
-                --nproc \${GALAXY_SLOTS:-4} &&
+metasbt profile --workdir "$workdir" \
+                --database "$(basename "$tarball_filepath" | cut -d'-' -f2)" \
+                --genomes "${input_dir}/genomes.txt" \
+                --uncertainty "$advanced.uncertainty" \
+                --pruning-threshold "$advanced.pruning_threshold" \
+                --nproc "\${GALAXY_SLOTS:-4}" &&
 
 rm "$tarball_filepath" &&
 
 mkdir output &&
 
-find ${workdir}/tmp/profiles -type f -name "*.txt" \
-    -exec sh -c 'cp "$1" "output/$(basename "$1")"' _ {} \;
+find "${workdir}/tmp/profiles" -type f -name "*.txt" -exec sh -c '
+    filepath="$1"
+    cp "$filepath" "output/$(basename "$filepath")"
+' _ {} \;
     ]]></command>
 
     <inputs>

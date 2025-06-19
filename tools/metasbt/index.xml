@@ -13,11 +13,11 @@
 #set workdir="./workdir"
 #set input_dir="${workdir}/genomes"
 
-mkdir -p ${input_dir} &&
+mkdir -p "${input_dir}" &&
 
 #for $genome in $genomes:
     #if $genome.ext.endswith("gz"):
-        gunzip "$genome" > "${input_dir}/${genome.name}.fna" &&
+        gzip -dc "$genome" > "${input_dir}/${genome.name}.fna" &&
     #else
         ln -s "$genome" "${input_dir}/${genome.name}.fna" &&
     #end if
@@ -26,45 +26,45 @@ mkdir -p ${input_dir} &&
 #if $advanced.index_update_conditional.index_update_option == "false":
     while IFS=$'\t' read -r seq_name seq_taxonomy; do 
         if [ -f "${input_dir}/${seq_name}.fna" ]; then
-            echo -e "${input_dir}/${seq_name}.fna\t${seq_taxonomy}" >> ${input_dir}/genomes.tsv;
+            echo -e "${input_dir}/${seq_name}.fna\t${seq_taxonomy}" >> "${input_dir}/genomes.tsv";
         fi
-    done < $references &&
+    done < $taxonomies &&
 
-    metasbt index --workdir $workdir \
+    metasbt index --workdir "$workdir" \
                   --database Database \
-                  --references ${input_dir}/genomes.tsv \
-                  --nproc \${GALAXY_SLOTS:-4} \
+                  --references "${input_dir}/genomes.tsv" \
+                  --nproc "\${GALAXY_SLOTS:-4}" \
                   --pack \
 
             #if $advanced.index_update_conditional.bfs_selection.bfs_auto == "false":
-                  --filter-size $advanced.index_update_conditional.bfs_selection.bfs_size \
+                  --filter-size "${advanced.index_update_conditional.bfs_selection.bfs_size}" \
             #else:
-                  --increase-filter-size $advanced.index_update_conditional.bfs_selection.bfs_size_increase \
-                  --min-kmer-occurrences $advanced.index_update_conditional.bfs_selection.min_kmer_occurrences \
+                  --increase-filter-size "$advanced.index_update_conditional.bfs_selection.bfs_size_increase" \
+                  --min-kmer-occurrences "$advanced.index_update_conditional.bfs_selection.min_kmer_occurrences" \
             #end if
 
             #if $advanced.index_update_conditional.kmers_selection.kmers_auto == "false":
-                  --kmer-size $advanced.index_update_conditional.kmers_selection.kmer_len \
+                  --kmer-size "$advanced.index_update_conditional.kmers_selection.kmer_len" \
             #else:
-                  --limit-kmer-size $advanced.index_update_conditional.kmers_selection.max_kmer_len \
+                  --limit-kmer-size "$advanced.index_update_conditional.kmers_selection.max_kmer_len" \
             #end if
 
             #if $advanced.dereplication_selection.dereplication == "true":
-                  --dereplicate $advanced.dereplication_selection.distance_threshold \
+                  --dereplicate "$advanced.dereplication_selection.distance_threshold" \
             #end if
 
             #if $advanced.quality_control_selection.quality_control == "true":
-                  --completeness $advanced.quality_control_selection.completeness \
-                  --contamination $advanced.quality_control_selection.contamination \
+                  --completeness "$advanced.quality_control_selection.completeness" \
+                  --contamination "$advanced.quality_control_selection.contamination" \
             #end if
 
             &&
 
-    ln -s ${workdir}/Database/clusters.tsv clusters.tsv &&
-    ln -s ${workdir}/Database/genomes.tsv genomes.tsv &&
+    ln -s "${workdir}/Database/clusters.tsv" clusters.tsv &&
+    ln -s "${workdir}/Database/genomes.tsv" genomes.tsv &&
 
 #else:
-    find ${input_dir} -type f -name "*.fna" -exec realpath {} >> ${input_dir}/genomes.txt \; &&
+    find "${input_dir}" -type f -name "*.fna" -exec realpath {} >> "${input_dir}/genomes.txt" \; &&
 
     #if $advanced.index_update_conditional.database_selection.source == "cvmfs":
         #set tarball_filepath="${workdir}/${advanced.index_update_conditional.database_selection.db_tarball}"
@@ -74,27 +74,27 @@ mkdir -p ${input_dir} &&
 
     ln -s "${advanced.index_update_conditional.database_selection.db_tarball}" "${tarball_filepath}" &&
 
-    metasbt unpack --workdir $workdir \
-                   --tarball ${tarball_filepath} &&
+    metasbt unpack --workdir "$workdir" \
+                   --tarball "${tarball_filepath}" &&
 
-    metasbt update --workdir $workdir \
-                   --database $(basename "$tarball_filepath" | cut -d'-' -f2) \
-                   --genomes ${input_dir}/genomes.txt \
-                   --nproc \${GALAXY_SLOTS:-4} \
+    metasbt update --workdir "$workdir" \
+                   --database "$(basename "$tarball_filepath" | cut -d'-' -f2)" \
+                   --genomes "${input_dir}/genomes.txt" \
+                   --nproc "\${GALAXY_SLOTS:-4}" \
                    --pack \
 
             #if $advanced.dereplication_selection.dereplication == "true":
-                   --dereplicate $advanced.dereplication_selection.distance_threshold \
+                   --dereplicate "$advanced.dereplication_selection.distance_threshold" \
             #end if
 
             #if $advanced.quality_control_selection.quality_control == "true":
-                   --completeness $advanced.quality_control_selection.completeness \
-                   --contamination $advanced.quality_control_selection.contamination \
+                   --completeness "$advanced.quality_control_selection.completeness" \
+                   --contamination "$advanced.quality_control_selection.contamination" \
             #end if
 
             &&
 
-    rm ${tarball_filepath} &&
+    rm "${tarball_filepath}" &&
 
     ln -s "${workdir}/$(basename "$tarball_filepath" | cut -d'-' -f2)/clusters.tsv" clusters.tsv &&
     ln -s "${workdir}/$(basename "$tarball_filepath" | cut -d'-' -f2)/genomes.tsv" genomes.tsv &&
