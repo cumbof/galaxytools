@@ -22,13 +22,15 @@
     </xml>
 
     <xml name="citations">
-        <citations type="bibtex">
-            @misc{metasbtrepo,
-                author={Fabio Cumbo, Daniel Blankenberg},
-                title={{MetaSBT: A scalable framework for automatically indexing microbial genomes and accurately characterizing metagenome-assembled genomes with Sequence Bloom Trees}},
-                publisher={Github},
-                url={https://github.com/cumbof/MetaSBT}
-                }
+        <citations>
+            <citation type="bibtex">
+@misc{metasbtrepo,
+    author={Fabio Cumbo, Daniel Blankenberg},
+    title={{MetaSBT: A scalable framework for automatically indexing microbial genomes and accurately characterizing metagenome-assembled genomes with Sequence Bloom Trees}},
+    publisher={Github},
+    url={https://github.com/cumbof/MetaSBT}
+}
+            </citation>
         </citations>
     </xml>
 </macros>
