@@ -63,14 +63,11 @@ find "${workdir}/tmp/profiles" -type f -name "*.txt" -exec sh -c '
 
             <when value="cvmfs">
                 <param name="db_tarball" type="select"
-                       label="Select a public MetaSBT database"
-                       help="Choose a specific version of a public database.">
+                        label="Select a MetaSBT database"
+                        help="Choose a specific version of a database.">
                     <options from_data_table="metasbt_databases">
-                        <column name="value" index="2" />
-                        <column name="name" format="${0} (v${1})" />
-                        <filter type="sort_by" column="1" />
+                        <validator message="No MetaSBT database is available" type="no_options"/>
                     </options>
-                    <validator type="no_options" message="There are no MetaSBT databases available." />
                 </param>
             </when>
 
