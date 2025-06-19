@@ -192,14 +192,11 @@ mv "$(find ${workdir} -maxdepth 1 -name '*.tar.gz' -print -quit)" MetaSBT-Databa
 
                         <when value="cvmfs">
                             <param name="db_tarball" type="select"
-                                    label="Select a public MetaSBT database"
+                                    label="Select a MetaSBT database"
                                     help="Choose a specific version of a database.">
                                 <options from_data_table="metasbt_databases">
-                                    <column name="value" index="2" />
-                                    <column name="name" format="${0} (v${1})" />
-                                    <filter type="sort_by" column="1" />
+                                    <validator message="No MetaSBT database is available" type="no_options"/>
                                 </options>
-                                <validator type="no_options" message="There are no MetaSBT databases available." />
                             </param>
                         </when>
 
@@ -248,16 +245,16 @@ mv "$(find ${workdir} -maxdepth 1 -name '*.tar.gz' -print -quit)" MetaSBT-Databa
 
     <outputs>
         <!-- Table with known and unknown clusters -->
-        <data format="tsv" name="clusters" label="${tool.name} on ${on_string}: clusters" from_work_dir="clusters.tsv">
-            <action>
+        <data format="tsv" name="clusters_table" label="${tool.name} on ${on_string}: clusters" from_work_dir="clusters.tsv">
+            <actions>
                 <action name="column_names" type="metadata" default="Cluster,Lineage,MAGs,References,Bloom Filter Density,Mean Completeness,Mean Contamination" />
                 <action name="column_types" type="metadata" default="str,str,int,int,float,float,float" />
                 <action name="comment_lines" type="metadata" default="4" />
-            </action>
+            </actions>
         </data>
 
         <!-- Table with list of genomes and their assignments -->
-        <data format="tsv" name="genomes" label="${tool.name} on ${on_string}: genomes" from_work_dir="genomes.tsv">
+        <data format="tsv" name="genomes_table" label="${tool.name} on ${on_string}: genomes" from_work_dir="genomes.tsv">
             <actions>
                 <action name="column_names" type="metadata" default="Input,Assignment,Cluster" />
                 <action name="column_types" type="metadata" default="str,str,str" />
