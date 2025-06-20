@@ -122,18 +122,24 @@ mv "$(find ${workdir} -maxdepth 1 -name '*.tar.gz' -print -quit)" MetaSBT-Databa
 
             <!-- Show different options in case of index or update -->
             <conditional name="index_update_conditional">
-                <param name="index_update_option" type="boolean" checked="false" truevalue="true" falsevalue="false" 
-                       label="Update a MetaSBT database" 
-                       help="When enabled, most of the advanced options are inherited from an already existing database and cannot be modified." />
+                <param name="index_update_option" type="select" 
+                        label="Update a MetaSBT database"
+                        help="When enabled, most of the advanced options are inherited from an already existing database and cannot be modified.">
+                    <option value="true">Enable</option>
+                    <option value="false" selected="true">Disable</option>
+                </param>
 
                 <when value="false">
                     <!-- Index -->
                     <!-- Estimate a kmer length -->
                     <conditional name="kmers_selection">
                         <!-- Enable kmer length estimation -->
-                        <param name="kmers_auto" type="boolean" checked="true" truevalue="true" falsevalue="false"
-                               label="Estimate a proper kmer length"
-                               help="Automatically estimate a proper kmer length for the input set of genomes with Kitsune." />
+                        <param name="kmers_auto" type="select" 
+                                label="Estimate a proper kmer lenght"
+                                help="Automatically estimate a proper kmer length for the input set of genomes with Kitsune.">
+                            <option value="true" selected="true">Enable</option>
+                            <option value="false">Disable</option>
+                        </param>
 
                         <when value="true">
                             <!-- Limit kmer length -->
@@ -153,9 +159,12 @@ mv "$(find ${workdir} -maxdepth 1 -name '*.tar.gz' -print -quit)" MetaSBT-Databa
                     <!-- Estimate the bloom filter size -->
                     <conditional name="bfs_selection">
                         <!-- Enable bloom filter size estimation -->
-                        <param name="bfs_auto" type="boolean" checked="true" truevalue="true" falsevalue="false"
-                               label="Estimate the bloom filter size"
-                               help="Automatically estimate the most appropriate bloom filter size that better fits with the input set of genomes with ntCard." />
+                        <param name="bfs_auto" type="select" 
+                                label="Estimate the bloom filter size"
+                                help="Automatically estimate the most appropriate bloom filter size that better fits with the input set of genomes with ntCard.">
+                            <option value="true" selected="true">Enable</option>
+                            <option value="false">Disable</option>
+                        </param>
 
                         <when value="true">
                             <!-- Increment the estimated bloom filter size -->
@@ -178,15 +187,14 @@ mv "$(find ${workdir} -maxdepth 1 -name '*.tar.gz' -print -quit)" MetaSBT-Databa
                     </conditional>
                 </when>
 
-                <when value="false">
-                    <!-- Index -->
+                <when value="true">
+                    <!-- Update -->
                     <conditional name="database_selection">
                         <!-- Select a MetaSBT database -->
-                        <!-- The boundaries table is in the tarball -->
                         <param name="source" type="select"
-                                label="Will you select a MetaSBT database from your history or a public database?"
+                                label="Will you use a MetaSBT database from your history or a public database?"
                                 help="Public databases are hosted on the Galaxy CVMFS.">
-                            <option value="cvmfs">Use a public database</option>
+                            <option value="cvmfs" selected="true">Use a public database</option>
                             <option value="history">Use a database from the history</option>
                         </param>
 
@@ -210,9 +218,12 @@ mv "$(find ${workdir} -maxdepth 1 -name '*.tar.gz' -print -quit)" MetaSBT-Databa
 
             <conditional name="dereplication_selection">
                 <!-- Enable the dereplication of input genomes -->
-                <param name="dereplication" type="boolean" checked="false" truevalue="true" falsevalue="false"
-                    label="Dereplication"
-                    help="Enable the dereplication of input genomes based on their ANI distance." />
+                <param name="dereplication" type="select"
+                        label="Dereplication"
+                        help="Enable the dereplication of input genomes based on their ANI distance.">
+                    <option value="true">Enable</option>
+                    <option value="false" selected="true">Disable</option>
+                </param>
 
                 <when value="true">
                     <!-- ANI distance threshold -->
@@ -220,13 +231,18 @@ mv "$(find ${workdir} -maxdepth 1 -name '*.tar.gz' -print -quit)" MetaSBT-Databa
                         label="Distance threshold"
                         help="Set a threshold based on the ANI distance of the sketch representation of the input genomes versus themselves and the other genomes in the database (in case of an update)." />
                 </when>
+
+                <when value="false" />
             </conditional>
 
             <conditional name="quality_control_selection">
                 <!-- Enable the quality control of input genomes -->
-                <param name="quality_control" type="boolean" checked="false" truevalue="true" falsevalue="false"
-                    label="Quality Control"
-                    help="Filter out genomes based on their completeness and contamination." />
+                <param name="quality_control" type="select"
+                        label="Quality Control"
+                        help="Filter out genomes based on their completeness and contamination.">
+                    <option value="true">Enable</option>
+                    <option value="false" selected="true">Disable</option>
+                </param>
 
                 <when value="true">
                     <!-- Completeness -->
@@ -239,13 +255,15 @@ mv "$(find ${workdir} -maxdepth 1 -name '*.tar.gz' -print -quit)" MetaSBT-Databa
                         label="Contamination threshold"
                         help="Set a threshold on the contamination and discard everything above this threshold." />
                 </when>
+
+                <when value="false" />
             </conditional>
         </section>
     </inputs>
 
     <outputs>
         <!-- Table with known and unknown clusters -->
-        <data format="tsv" name="clusters_table" label="${tool.name} on ${on_string}: clusters" from_work_dir="clusters.tsv">
+        <data format="tabular" name="clusters_table" label="${tool.name} on ${on_string}: clusters" from_work_dir="clusters.tsv">
             <actions>
                 <action name="column_names" type="metadata" default="Cluster,Lineage,MAGs,References,Bloom Filter Density,Mean Completeness,Mean Contamination" />
                 <action name="column_types" type="metadata" default="str,str,int,int,float,float,float" />
@@ -254,7 +272,7 @@ mv "$(find ${workdir} -maxdepth 1 -name '*.tar.gz' -print -quit)" MetaSBT-Databa
         </data>
 
         <!-- Table with list of genomes and their assignments -->
-        <data format="tsv" name="genomes_table" label="${tool.name} on ${on_string}: genomes" from_work_dir="genomes.tsv">
+        <data format="tabular" name="genomes_table" label="${tool.name} on ${on_string}: genomes" from_work_dir="genomes.tsv">
             <actions>
                 <action name="column_names" type="metadata" default="Input,Assignment,Cluster" />
                 <action name="column_types" type="metadata" default="str,str,str" />
@@ -267,8 +285,13 @@ mv "$(find ${workdir} -maxdepth 1 -name '*.tar.gz' -print -quit)" MetaSBT-Databa
     </outputs>
 
     <tests>
-        <test>
-            <!-- Add test cases here -->
+        <test expect_num_outputs="3">
+            <param name="genomes" value="genome_1.fna.gz,genome_2.fna.gz,genome_3.fna.gz,genome_4.fna.gz,genome_5.fna.gz,genome_6.fna.gz" ftype="fna.gz" />
+            <param name="index_update_option" value="true" />
+            <param name="db_tarball" value="MetaSBT-Test-20250620.1.tar.gz" />
+            <output name="clusters_table" file="clusters.tsv" ftype="tabular" compare="contains" />
+            <output name="genomes_table" file="genomes.tsv" ftype="tabular" compare="contains" />
+            <output name="database" file="MetaSBT-Test-20250620.2.tar.gz" ftype="tar.gz" md5="70bfd0c5609a8aa4c2e0607e89896950" />
         </test>
     </tests>
 

@@ -44,7 +44,7 @@ mkdir output &&
 
 find "${workdir}/tmp/profiles" -type f -name "*.txt" -exec sh -c '
     filepath="$1"
-    cp "$filepath" "output/$(basename "$filepath")"
+    cp "$filepath" "output/$(basename "$filepath" .txt).tsv"
 ' _ {} \;
     ]]></command>
 
@@ -55,9 +55,9 @@ find "${workdir}/tmp/profiles" -type f -name "*.txt" -exec sh -c '
 
         <conditional name="database">
             <param name="source" type="select"
-                   label="Database source"
-                   help="Select whether to use a public MetaSBT database or one from your history.">
-                <option value="cvmfs">Use a public database</option>
+                    label="Database source"
+                    help="Public databases are hosted on the Galaxy CVMFS.">
+                <option value="cvmfs" selected="true">Use a public database</option>
                 <option value="history">Use a database from the history</option>
             </param>
 
@@ -90,13 +90,22 @@ find "${workdir}/tmp/profiles" -type f -name "*.txt" -exec sh -c '
 
     <outputs>
         <collection name="profiles" type="list" label="${tool.name} on ${on_string}: taxonomic profiles">
-            <discover_datasets pattern="(?P&lt;name&gt;.+)\.txt" directory="output" ext="tabular" visible="true" />
+            <discover_datasets pattern="(?P&lt;name&gt;.+)\.tsv" directory="output" ext="tabular" visible="true" />
         </collection>
     </outputs>
 
     <tests>
-        <test>
-            <!-- Add test cases here -->
+        <test expect_num_outputs="3">
+            <param name="genomes" value="genome_1.fna.gz,genome_2.fna.gz,genome_3.fna.gz,genome_4.fna.gz,genome_5.fna.gz,genome_6.fna.gz" ftype="fna.gz" />
+            <param name="db_tarball" value="MetaSBT-Test-20250620.1.tar.gz" />
+            <output_collection name="profiles" type="list">
+                <element name="profile_on_genome_1.tsv" file="genome_1.tsv" ftype="tabular" compare="contains"/>
+                <element name="profile_on_genome_2.tsv" file="genome_2.tsv" ftype="tabular" compare="contains"/>
+                <element name="profile_on_genome_3.tsv" file="genome_3.tsv" ftype="tabular" compare="contains"/>
+                <element name="profile_on_genome_4.tsv" file="genome_4.tsv" ftype="tabular" compare="contains"/>
+                <element name="profile_on_genome_5.tsv" file="genome_5.tsv" ftype="tabular" compare="contains"/>
+                <element name="profile_on_genome_6.tsv" file="genome_6.tsv" ftype="tabular" compare="contains"/>
+            </output_collection>
         </test>
     </tests>
 
