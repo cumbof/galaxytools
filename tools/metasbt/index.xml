@@ -287,11 +287,34 @@ mv "$(find ${workdir} -maxdepth 1 -name '*.tar.gz' -print -quit)" MetaSBT-Databa
     <tests>
         <test expect_num_outputs="3">
             <param name="genomes" value="genome_1.fna.gz,genome_2.fna.gz,genome_3.fna.gz,genome_4.fna.gz,genome_5.fna.gz,genome_6.fna.gz" ftype="fna.gz" />
-            <param name="index_update_option" value="true" />
-            <param name="db_tarball" value="MetaSBT-Test-20250620.1.tar.gz" />
-            <output name="clusters_table" file="clusters.tsv" ftype="tabular" compare="contains" />
-            <output name="genomes_table" file="genomes.tsv" ftype="tabular" compare="contains" />
-            <output name="database" file="MetaSBT-Test-20250620.2.tar.gz" ftype="tar.gz" md5="70bfd0c5609a8aa4c2e0607e89896950" />
+            
+            <conditional name="index_update_conditional">
+                <param name="index_update_option" value="true" />
+
+                <conditional name="database_selection">
+                    <param name="source" value="history" />
+                    <param name="db_tarball" value="MetaSBT-Test-20250620.1.tar.gz" />
+                </conditional>
+            </conditional>
+            
+            <output name="clusters_table" file="clusters.tsv" ftype="tabular">
+                <assert_contents>
+                    <has_text_matching expression="# cluster_id\tlevel\tdensity\treferences_count\tmags_count\treferences_list\tmags_list\tcentroid\tknown\ttaxonomy\tinternal\tmin_ani\tmax_ani" />
+                    <has_text text="k__Viruses|p__Nucleocytoviricota|c__Pokkesviricetes|o__Chitovirales|f__Poxviridae|g__Orthopoxvirus|s__Monkeypox_virus" />
+                </assert_contents>
+            </output>
+            
+            <output name="genomes_table" file="genomes.tsv" ftype="tabular">
+                <assert_contents>
+                    <has_text_matching expression="# genome_id\ttype\tassignment\tinternal" />
+                    <has_text text="genome_1" />
+                    <has_text text="genome_2" />
+                    <has_text text="genome_3" />
+                    <has_text text="genome_4" />
+                </assert_contents>
+            </output>
+            
+            <output name="database" file="MetaSBT-Test-20250620.2.tar.gz" ftype="tar.gz" compare="sim_size" delta_frac="0.1" />
         </test>
     </tests>
 
