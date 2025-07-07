@@ -9,8 +9,9 @@
     <expand macro="requirements"/>
 
     <command detect_errors="exit_code"><![CDATA[
-#set workdir="./workdir"
-#set input_dir="${workdir}/genomes"
+source /home/fabio/mambaforge/etc/profile.d/conda.sh && conda activate metasbt &&
+
+#set input_dir = "./genomes"
 
 mkdir -p "${input_dir}" &&
 
@@ -22,30 +23,32 @@ mkdir -p "${input_dir}" &&
     #end if
 #end for
 
-find "${input_dir}" -type f -name "*.fna" -exec realpath {} \; > "${input_dir}/genomes.txt" &&
+find "${input_dir}" -type f -name '*.fna' -exec realpath {} \; > "${input_dir}/genomes.txt" &&
 
-#set tarball_filepath = "${workdir}/${database.db_tarball.name}"
+ln -s "$database.db_tarball" "./MetaSBT-Database.tar.gz" &&
 
-ln -s "$database.db_tarball" "$tarball_filepath" &&
+metasbt unpack --workdir "."
+               --database "Database"
+               --tarball "./MetaSBT-Database.tar.gz" &&
 
-metasbt unpack --workdir "$workdir" \
-               --tarball "$tarball_filepath" &&
-
-metasbt profile --workdir "$workdir" \
-                --database "$(basename "$tarball_filepath" | cut -d'-' -f2)" \
-                --genomes "${input_dir}/genomes.txt" \
-                --uncertainty "$advanced.uncertainty" \
-                --pruning-threshold "$advanced.pruning_threshold" \
+metasbt profile --workdir "."
+                --database "Database"
+                --genomes "${input_dir}/genomes.txt"
+                --uncertainty "$advanced.uncertainty"
+                --pruning-threshold "$advanced.pruning_threshold"
                 --nproc "\${GALAXY_SLOTS:-4}" &&
 
-rm "$tarball_filepath" &&
+rm "./MetaSBT-Database.tar.gz" &&
 
 mkdir output &&
 
-find "${workdir}/tmp/profiles" -type f -name "*.txt" -exec sh -c '
-    filepath="$1"
-    cp "$filepath" "output/$(basename "$filepath" .txt).tsv"
-' _ {} \;
+#for $i, $genome in enumerate($genomes):
+    sed 's/^# *//' "./tmp/profiles/${genome.name}.txt" > "./output/${genome.name}.tsv"
+
+    #if $i < len($genomes) - 1:
+        &&
+    #end if
+#end for
     ]]></command>
 
     <inputs>
@@ -72,7 +75,7 @@ find "${workdir}/tmp/profiles" -type f -name "*.txt" -exec sh -c '
             </when>
 
             <when value="history">
-                <param name="db_tarball" type="data" format="tar.gz"
+                <param name="db_tarball" type="data" format="tar"
                        label="Select a MetaSBT database tarball" />
             </when>
         </conditional>
@@ -90,7 +93,7 @@ find "${workdir}/tmp/profiles" -type f -name "*.txt" -exec sh -c '
 
     <outputs>
         <collection name="profiles" type="list" label="${tool.name} on ${on_string}: taxonomic profiles">
-            <discover_datasets pattern="(?P&lt;name&gt;.+)\.tsv" directory="output" ext="tabular" visible="true" />
+            <discover_datasets pattern="(?P&lt;name&gt;.+)\.tsv" directory="output" ext="tabular" visible="false" />
         </collection>
     </outputs>
 
